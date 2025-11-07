@@ -25,34 +25,37 @@ class SoraWM:
     def run_batch(self, input_video_dir_path: Path,
         output_video_dir_path: Path | None = None,
         progress_callback: Callable[[int], None] | None = None,
+        quiet: bool = False,
         ):
         if output_video_dir_path is None:
             output_video_dir_path = input_video_dir_path.parent / "watermark_removed"
-            logger.warning(f"output_video_dir_path is not set, using {output_video_dir_path} as output_video_dir_path")
+            if not quiet:
+                logger.warning(f"output_video_dir_path is not set, using {output_video_dir_path} as output_video_dir_path")
         output_video_dir_path.mkdir(parents=True, exist_ok=True)        
         input_video_paths = []
         for ext in VIDEO_EXTENSIONS:
             input_video_paths.extend(input_video_dir_path.rglob(f"*{ext}"))
         
         video_lengths = len(input_video_paths)
-        logger.info(f"Found {video_lengths} video(s) to process")
-        
-        for idx, input_video_path in enumerate(tqdm(input_video_paths, desc="Processing videos")):
+        if not quiet:
+            logger.info(f"Found {video_lengths} video(s) to process")
+        for idx, input_video_path in enumerate(tqdm(input_video_paths, desc="Processing videos", disable=quiet)):
             output_video_path = output_video_dir_path / input_video_path.name            
             if progress_callback:
                 def batch_progress_callback(single_video_progress: int):
                     overall_progress = int((idx / video_lengths) * 100 + (single_video_progress / video_lengths))
                     progress_callback(min(overall_progress, 100))
                 
-                self.run(input_video_path, output_video_path, progress_callback=batch_progress_callback)
+                self.run(input_video_path, output_video_path, progress_callback=batch_progress_callback, quiet=quiet)
             else:
-                self.run(input_video_path, output_video_path, progress_callback=None)
+                self.run(input_video_path, output_video_path, progress_callback=None, quiet=quiet)
 
     def run(
         self,
         input_video_path: Path,
         output_video_path: Path,
         progress_callback: Callable[[int], None] | None = None,
+        quiet: bool = False,
     ):
         input_video_loader = VideoLoader(input_video_path)
         output_video_path.parent.mkdir(parents=True, exist_ok=True)
@@ -93,12 +96,12 @@ class SoraWM:
         detect_missed = []
         bbox_centers = []
         bboxes = []
-
-        logger.debug(
-            f"total frames: {total_frames}, fps: {fps}, width: {width}, height: {height}"
-        )
+        if not quiet:
+            logger.debug(
+                f"total frames: {total_frames}, fps: {fps}, width: {width}, height: {height}"
+            )
         for idx, frame in enumerate(
-            tqdm(input_video_loader, total=total_frames, desc="Detect watermarks")
+            tqdm(input_video_loader, total=total_frames, desc="Detect watermarks", disable=quiet)
         ):
             detection_result = self.detector.detect(frame)
             if detection_result["detected"]:
@@ -116,9 +119,8 @@ class SoraWM:
             if progress_callback and idx % 10 == 0:
                 progress = 10 + int((idx / total_frames) * 40)
                 progress_callback(progress)
-
-        logger.debug(f"detect missed frames: {detect_missed}")
-        # logger.debug(f"bbox centers: \n{bbox_centers}")
+        if not quiet:
+            logger.debug(f"detect missed frames: {detect_missed}")
         if detect_missed:
             # 1. find the bkps of the bbox centers
             bkps = find_2d_data_bkps(bbox_centers)
@@ -143,8 +145,9 @@ class SoraWM:
                     and interval_bboxes[interval_idx] is not None
                 ):
                     frame_bboxes[missed_idx]["bbox"] = interval_bboxes[interval_idx]
-                    logger.debug(f"Filled missed frame {missed_idx} with bbox:\n"
-                    f" {interval_bboxes[interval_idx]}")
+                    if not quiet:
+                        logger.debug(f"Filled missed frame {missed_idx} with bbox:\n"
+                        f" {interval_bboxes[interval_idx]}")
                 else:
                     # if the interval has no valid bbox, use the previous and next frame to complete (fallback strategy)
                     before = max(missed_idx - 1, 0)
@@ -162,9 +165,7 @@ class SoraWM:
         
         input_video_loader = VideoLoader(input_video_path)
 
-        for idx, frame in enumerate(tqdm(input_video_loader, total=total_frames, desc="Remove watermarks")):
-        # for idx in tqdm(range(total_frames), desc="Remove watermarks"):
-            # frame_info = 
+        for idx, frame in enumerate(tqdm(input_video_loader, total=total_frames, desc="Remove watermarks", disable=quiet)):
             bbox = frame_bboxes[idx]["bbox"]
             if bbox is not None:
                 x1, y1, x2, y2 = bbox
