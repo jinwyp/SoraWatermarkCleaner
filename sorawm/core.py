@@ -224,6 +224,9 @@ class SoraWM:
             frame_counter = 0
             for start, end in zip(bkps_full[:-1], bkps_full[1:]):
                 frames = np.array(input_video_loader.get_slice(start, end))
+                # Convert BGR to RGB for E2FGVI_HQ cleaner (expects RGB format)
+                frames = frames[:, :, :, ::-1].copy()
+                
                 # masks = [np.zeros((height, width), dtype=np.uint8) for _ in range(len(frames))]
                 # masks as np to
                 masks = np.zeros((len(frames), height, width), dtype=np.uint8)
@@ -239,7 +242,9 @@ class SoraWM:
 
                 # write the clean frames ....
                 for cleaned_frame in cleaned_frames:
-                    process_out.stdin.write(cleaned_frame.tobytes())
+                    # Convert RGB back to BGR for FFmpeg output (expects bgr24 format)
+                    cleaned_frame_bgr = cleaned_frame[:, :, ::-1]
+                    process_out.stdin.write(cleaned_frame_bgr.astype(np.uint8).tobytes())
                     frame_counter += 1
                     # 50% - 95%
                     if progress_callback and frame_counter % 10 == 0:
