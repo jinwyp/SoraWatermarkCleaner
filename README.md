@@ -4,19 +4,33 @@ English | [中文](README-zh.md)
 
 This project provides an elegant way to remove the sora watermark in the sora2 generated videos. 
 
+
 <table>
   <tr>
-    <td width="33%">
-      <h3 align="center">Fast Remove</h3>
-<video src="https://github.com/user-attachments/assets/6980189e-b3e0-4fca-8a21-497b6beb6ef0" width="100%"></video>
+    <td width="20%">
+      <strong>Case1(25s)</strong>
     </td>
-    <td width="33%">
-      <h3 align="center" > Better Remove</h3>
-      <video src="https://github.com/user-attachments/assets/92f516e3-bff2-41e3-803d-c5093c870717" width="100%"></video>
+    <td width="80%">
+      <video src="https://github.com/user-attachments/assets/6980189e-b3e0-4fca-8a21-497b6beb6ef0" 
+             width="100%" controls></video>
     </td>
-       <td width="33%">
-      <h3 align="center">Original</h3>
-<video src="https://github.com/user-attachments/assets/1384e4ba-8478-4bf1-8b08-cc926961ad29" width="100%"></video>
+  </tr>
+  <tr>
+    <td>
+      <strong>Case2(10s)</strong>
+    </td>
+    <td>
+      <video src="https://github.com/user-attachments/assets/2773df41-62dc-4876-bd2f-4dd3ccac4b9e" 
+             width="100%" controls></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Case3(10s)</strong>
+    </td>
+    <td>
+      <video src="https://github.com/user-attachments/assets/2bdba310-6379-48f2-a93c-6de857c4df3d" 
+             width="100%" controls></video>
     </td>
   </tr>
 </table>
