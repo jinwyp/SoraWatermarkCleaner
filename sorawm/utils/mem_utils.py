@@ -2,6 +2,7 @@
 
 # import contextlib
 import gc
+
 # import time
 # from collections.abc import Generator
 from dataclasses import dataclass, field
@@ -12,16 +13,18 @@ from .mem_constants import GiB_bytes
 import torch
 # import torch.types
 
-from .mem_constants import GiB_bytes 
+from .mem_constants import GiB_bytes
 
 from dataclasses import dataclass, field
 
+
 @dataclass
 class MemoryProfilingResult:
-    # GB 
+    # GB
     free_memory: float = 0.0
     total_memory: float = 0.0
     torch_memory: float = 0.0
+
 
 def memory_profiling() -> MemoryProfilingResult:
     gc.collect()
@@ -35,8 +38,6 @@ def memory_profiling() -> MemoryProfilingResult:
         torch_memory=torch_memory / GiB_bytes,
     )
     return result
-    
-
 
     # result = MemoryProfilingResult()
 
