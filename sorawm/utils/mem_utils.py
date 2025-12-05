@@ -26,10 +26,16 @@ class MemoryProfilingResult:
     torch_memory: float = 0.0
 
 
-def memory_profiling() -> MemoryProfilingResult:
+def clear_gpu_memory():
     gc.collect()
     torch.cuda.empty_cache()
     torch.cuda.reset_peak_memory_stats()
+    torch.cuda.synchronize()
+
+
+
+def memory_profiling() -> MemoryProfilingResult:
+    clear_gpu_memory()
     free_memory, total_memory = torch.cuda.mem_get_info()
     torch_memory = torch.cuda.memory_reserved()
     result = MemoryProfilingResult(
